@@ -16,12 +16,7 @@ import org.springframework.web.servlet.ModelAndView;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-
-import static jdk.internal.org.jline.reader.impl.LineReaderImpl.CompletionType.List;
+import java.util.*;
 
 @Controller
 public class BasicController {
@@ -31,35 +26,51 @@ public class BasicController {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    public List<Result> getTwoItems(List<Result> resultsFromQuery) throws Exception {
+
+        List<Result> twoCodes = null;
+
+        if (resultsFromQuery.size() < 2) {
+            throw new Exception("require more sinppet codes items (< 2 items)");
+        };
+
+        // create code1 and code2
+        Result code1 = resultsFromQuery.get(0);
+        Result code2 = resultsFromQuery.get(1);
+
+        // get only two(for now first two) items from resultsFromQuery
+        // pick only 2
+        twoCodes.add(code1);
+        twoCodes.add(code2);
+
+        // put them in the model
+        return twoCodes;
+    }
+
     @GetMapping("/hello")
     @ResponseBody
-    public String hello(Model model){
+    public String hello(Model model) throws Exception {
 
         String templatePath = ".../.../resources/templates/hello.mustache";
 
-        record Result(UUID id, String code) {}
         // all rows
         List<Result> results = this.jdbcTemplate.query(
                 "select id, code from code_snippet",
                 new DataClassRowMapper<>(Result.class)
         );
 
-        public List<Result> getTwoItems(List<Result> resultsFromQuery){
-            List<Result> twoCodes;
-            // if (resultsFromQuery.length < 2) {error}
-            // get only two(for now first two) items from resultsFromQuery
-            // create code1 and code2
-            // put them in the model
-            return twoCodes;
-        }
+        List<Result> twoCodes = getTwoItems(results);
 
         // model that will be sent to frontend
+
+        // get only two(for now first two) items from resultsFromQuery
+        // pick only 2
+        Result code1Result = twoCodes.get(0);
+        Result code2Result = twoCodes.get(1);
         Map<String, Object> code1 = new HashMap<>();
         Map<String, Object> code2 = new HashMap<>();
-        // pick only 2
-        code1.put("code1", results.get(0));
-
-        code2.put("code2", results.get(1));
+        code1.put("code1", code1Result);
+        code2.put("code2", code2Result);
 
         // putting into model
         model.addAllAttributes(code1);
@@ -67,6 +78,8 @@ public class BasicController {
 
         return "hello";
     }
+
+
 
 
 }

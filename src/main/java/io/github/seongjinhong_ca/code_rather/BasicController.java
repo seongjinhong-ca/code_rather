@@ -10,6 +10,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -49,35 +51,50 @@ public class BasicController {
 
     @GetMapping("/hello")
     @ResponseBody
-    public String hello(Model model) throws Exception {
+    public ModelAndView hello() throws Exception {
 
         String templatePath = ".../.../resources/templates/hello.mustache";
 
         // all rows
-        List<Result> results = this.jdbcTemplate.query(
+        var result = this.jdbcTemplate.query(
                 "select id, code from code_snippet",
                 new DataClassRowMapper<>(Result.class)
         );
+        Map<String, List<Result>> resultsMap = new HashMap<>();
+        resultsMap.put("results", result);
+        ModelAndView mav = new ModelAndView("hello", resultsMap);
+//        List<Result> twoCodes = getTwoItems(results);
+//
+//        // model that will be sent to frontend
+//
+//        // get only two(for now first two) items from resultsFromQuery
+//        // pick only 2
+//        Result code1Result = twoCodes.get(0);
+//        Result code2Result = twoCodes.get(1);
+//        Map<String, Object> code1 = new HashMap<>();
+//        Map<String, Object> code2 = new HashMap<>();
+//        code1.put("code1", code1Result);
+//        code2.put("code2", code2Result);
+//
+//        // putting into model
+//        model.addAllAttributes(code1);
+//        model.addAllAttributes(code2);
 
-        List<Result> twoCodes = getTwoItems(results);
-
-        // model that will be sent to frontend
-
-        // get only two(for now first two) items from resultsFromQuery
-        // pick only 2
-        Result code1Result = twoCodes.get(0);
-        Result code2Result = twoCodes.get(1);
-        Map<String, Object> code1 = new HashMap<>();
-        Map<String, Object> code2 = new HashMap<>();
-        code1.put("code1", code1Result);
-        code2.put("code2", code2Result);
-
-        // putting into model
-        model.addAllAttributes(code1);
-        model.addAllAttributes(code2);
-
-        return "hello";
+//        return ResponseEntity.ok(result);
+        return mav;
     }
+
+    @PostMapping("/process-code")
+    @ResponseBody
+    public String processCode(@RequestBody String code) {
+        // 서버에서 받은 코드를 처리하고 결과를 반환 (여기서는 간단히 그대로 반환)
+        // query db to find the code with the same id from code snippet table
+        // compare the status of the code from db with the code came from frontend
+        // if content is selected -> insert
+
+        return "Received code: " + code;
+    }
+
 
 
 

@@ -48,6 +48,20 @@ public class BasicController {
         // put them in the model
         return twoCodes;
     }
+    List<Result> getTwoRandomItems(List<Result> results) {
+        if (results.size() <= 2) {
+            return results;
+        } else {
+            Random rand = new Random();
+            int firstIndex = rand.nextInt(results.size());
+            int secondIndex = firstIndex;
+            while (firstIndex == secondIndex) {
+                secondIndex = rand.nextInt(results.size());
+            }
+            return List.of(results.get(firstIndex), results.get(secondIndex));
+        }
+    }
+
 
     @GetMapping("/hello")
     @ResponseBody
@@ -60,27 +74,15 @@ public class BasicController {
                 "select id, code from code_snippet",
                 new DataClassRowMapper<>(Result.class)
         );
-        Map<String, List<Result>> resultsMap = new HashMap<>();
-        resultsMap.put("results", result);
-        ModelAndView mav = new ModelAndView("hello", resultsMap);
-//        List<Result> twoCodes = getTwoItems(results);
-//
-//        // model that will be sent to frontend
-//
-//        // get only two(for now first two) items from resultsFromQuery
-//        // pick only 2
-//        Result code1Result = twoCodes.get(0);
-//        Result code2Result = twoCodes.get(1);
-//        Map<String, Object> code1 = new HashMap<>();
-//        Map<String, Object> code2 = new HashMap<>();
-//        code1.put("code1", code1Result);
-//        code2.put("code2", code2Result);
-//
-//        // putting into model
-//        model.addAllAttributes(code1);
-//        model.addAllAttributes(code2);
 
-//        return ResponseEntity.ok(result);
+        List<Result> twoCodes = getTwoRandomItems(result);
+
+        Map<String, Result> model = new HashMap<>();
+//        model.put("results", result);
+        model.put("code1", twoCodes.get(0));
+        model.put("code2", twoCodes.get(1));
+        ModelAndView mav = new ModelAndView("hello", model);
+
         return mav;
     }
 
